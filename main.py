@@ -5,31 +5,37 @@ import numpy as np
 from math import log, sqrt, ceil
 
 SUPPORT = 0.03
-EPSILON = 0.1
-DELTA = 0.1
+EPSILON = 0.2
+DELTA = 0.2
 MIU = 0.001
 #DATA_FILE = './Market_Basket_Optimisation.csv'
-DATA_FILE = './groceries - groceries.csv'
+#DATA_FILE = './groceries - groceries.csv'
+DATA_FILE = './ItemList.csv'
 
-def main():
-    """
-    Data link: https://www.kaggle.com/code/roshansharma/market-basket-analysis/data (Market_Basket_Optimisation.csv)
-               https://www.kaggle.com/datasets/akalyasubramanian/dataset-for-apriori-algorithm-frequent-itemsets (Market_Basket_Optimisation.csv)
-               https://www.kaggle.com/datasets/irfanasrullah/groceries (groceries-groceries.csv)
-    """
-    Data = pd.read_csv(DATA_FILE, delimiter=',', header = None)
-        
-    # Intializing the list
+def read_data(file_name):
     transactions = []
-    # populating a list of transactions
-    for i in range(len(Data)): 
-        transaction = []
-        for j in range(len(Data.values[i])):
-            if not (str(Data.values[i,j]) == 'nan' or Data.values[i,j].isdigit()):                
-                transaction.append(str(Data.values[i,j]))
-        transactions.append(transaction)
-            
+    if file_name == './ItemList.csv':
+        with open(file_name, 'r') as file:
+            lines = file.readlines()
+            for line in lines[1:]:                
+                transactions.append(line.strip().split(',')[2:])
+    else:
+        Data = pd.read_csv(DATA_FILE, delimiter=',', header = None)
+        for i in range(len(Data)): 
+            transaction = []
+            for j in range(len(Data.values[i])):
+                if not (str(Data.values[i,j]) == 'nan' or str(Data.values[i,j]).isdigit()):                
+                    transaction.append(str(Data.values[i,j]))
+            transactions.append(transaction)        
+    print(transactions[0])
+    return transactions
+
+def main():  
+     
+    transactions = read_data(DATA_FILE)
     
+    print('Data was read from file...')                        
+    print('Encoding transactions...')
     te = TransactionEncoder()
     te_ary = te.fit(transactions).transform(transactions)
     df = pd.DataFrame(te_ary, columns=te.columns_)
