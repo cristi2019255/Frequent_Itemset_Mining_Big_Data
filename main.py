@@ -3,9 +3,9 @@ from preprocesing import encode_transactions, read_data
 from utils import apriori_df
 
 SUPPORT = 0.03
-#DATA_FILE = './Market_Basket_Optimisation.csv'
-#DATA_FILE = './groceries - groceries.csv'
-DATA_FILE = './ItemList.csv'
+#DATA_FILE = './DataSets/Market_Basket_Optimisation.csv'
+#DATA_FILE = './DataSets/groceries - groceries.csv'
+DATA_FILE = './DataSets/ItemList.csv'
 
 
 def main():  

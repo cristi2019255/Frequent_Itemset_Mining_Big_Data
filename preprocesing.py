@@ -11,7 +11,7 @@ def read_data(file_name):
         list of lists: the list of transactions
     """
     transactions = []
-    if file_name == './ItemList.csv':
+    if file_name == './DataSets/ItemList.csv':
         with open(file_name, 'r') as file:
             lines = file.readlines()
             for line in lines[1:]:                
