@@ -13,7 +13,9 @@ def compute_d_bound(df):
     P.S. Can be optimized in future
     """
     length_dict = {}
-    df = df.drop_duplicates().count(axis='columns') # removing duplicates (in order to remain only with unique transactions) and geting the length of all transactions        
+    # removing duplicates (in order to remain only with unique transactions) and geting the length of all transactions 
+    df = df.drop_duplicates()
+    df = df.sum(axis=1)       
     for l in df:       
        if l in length_dict.keys():
            length_dict[l] += 1                          
