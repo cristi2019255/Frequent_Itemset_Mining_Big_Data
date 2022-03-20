@@ -16,5 +16,5 @@ The data sets we use are transactional data sets. <br/>
 Links to the data used: <br/>
 1.1) https://www.kaggle.com/code/roshansharma/market-basket-analysis/data (Market_Basket_Optimisation.csv) <br/>
 1.2) https://www.kaggle.com/datasets/akalyasubramanian/dataset-for-apriori-algorithm-frequent-itemsets (Market_Basket_Optimisation.csv) (Transactions: 7500) <br/>
-1)   https://www.kaggle.com/datasets/irfanasrullah/groceries (groceries-groceries.csv)    (Transactions: 9935) <br/>
-2)   https://www.kaggle.com/code/oliviapointon/market-basket-analysis-apriori-algorithm/data (ItemList.csv) (Transactions: 23195) <br/>
+2)   https://www.kaggle.com/datasets/irfanasrullah/groceries (groceries-groceries.csv)    (Transactions: 9935) <br/>
+3)   https://www.kaggle.com/code/oliviapointon/market-basket-analysis-apriori-algorithm/data (ItemList.csv) (Transactions: 23195) <br/>
