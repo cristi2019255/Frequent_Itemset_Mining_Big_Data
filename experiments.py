@@ -70,7 +70,7 @@ def RU_experiment(transactions, transactions_df, dataset_size, nr_true_frequent_
     """
     
     # computing d-bound
-    d = compute_d_bound(transactions)
+    d = compute_d_bound(transactions_df)
     
     c = 0.5         
     sample_RU_size = min(dataset_size, ceil((4*c/(epsilon**2)) * (d + log(1/delta))))

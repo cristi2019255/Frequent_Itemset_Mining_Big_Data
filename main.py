@@ -3,6 +3,7 @@ from preprocesing import encode_transactions, read_data
 from utils import apriori_df
 
 SUPPORT = 0.02
+#DATA_FILE = './DataSets/all_frequent.csv'
 #DATA_FILE = './DataSets/Market_Basket_Optimisation.csv'
 #DATA_FILE = './DataSets/groceries - groceries.csv'
 DATA_FILE = './DataSets/ItemList.csv'
@@ -18,7 +19,8 @@ def main():
     print(f'True support: {SUPPORT}')
     true_frequent_itemsets, nr_true_frequent_itemsets = apriori_df(transactions_df, SUPPORT)
     print(f'Nr of true frequent itemsets: {nr_true_frequent_itemsets}')
-        
+    
+
     toivonen_experiment(transactions=transactions,
                         transactions_df=transactions_df,
                         dataset_size=dataset_size,

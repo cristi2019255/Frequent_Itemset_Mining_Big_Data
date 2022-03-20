@@ -1,33 +1,35 @@
 import numpy as np
 from mlxtend.frequent_patterns import apriori
 
-def compute_d_bound(D):
+def compute_d_bound(df):
     """
     Computing the d-bound: the largest integer d such as the data set contains at least d different transactions of length at least d
     Args:
-        D (list of lists): list of all the transactions
+        df (transactions dataFrame)
 
     Returns:
         int: the d-bound
+        
+    P.S. Can be optimized in future
     """
-    L = {}
-    for transaction in D:
-       l = len(transaction) 
-       if l in L.keys():
-           L[l] += 1                          
+    length_dict = {}
+    df = df.drop_duplicates().count(axis='columns') # removing duplicates (in order to remain only with unique transactions) and geting the length of all transactions        
+    for l in df:       
+       if l in length_dict.keys():
+           length_dict[l] += 1                          
        else:
-           L[l] = 1
+           length_dict[l] = 1
        
        for i in range(1,l):
-        if i in L.keys():
-            L[i] += 1                          
-        else:
-            L[i] = 1
-    keys = list(L.keys())[:]
+            if i in length_dict.keys():
+                length_dict[i] += 1                          
+            else:
+                length_dict[i] = 1
+    keys = list(length_dict.keys())[:]
     for key in keys:
-        if L[key] < key:
-            L.pop(key)                 
-    return max(L.keys())
+        if length_dict[key] < key:
+            length_dict.pop(key)                 
+    return max(length_dict.keys())
 
 
 def remove_infrequent(D, frequent_itemsets, true_support):
