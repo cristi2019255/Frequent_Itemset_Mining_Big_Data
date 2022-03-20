@@ -1,4 +1,4 @@
-# Frequent_Itemset_Mining_Big_Data
+# Frequent Itemset Mining Big Data
 Frequent item set mining in context of big data <br/>
 
 This is an analysis of how data can be sampled for frequent item set mining in order to get reasonable results in context of big data. <br/>
