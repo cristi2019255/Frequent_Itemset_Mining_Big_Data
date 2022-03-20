@@ -3,11 +3,11 @@ from math import log, sqrt, ceil
 from utils import apriori_df, compute_d_bound, remove_infrequent
 
 
-EPSILON = 0.5
-DELTA = 0.2
-MIU = 0.001
+EPSILON = 0.15
+DELTA = 0.01
+MIU = 0.0001
 
-def toivonen_experiment(transactions, transactions_df, dataset_size, total_nr_of_items, nr_true_frequent_itemsets,  true_support, epsilon = EPSILON, delta = DELTA, miu = MIU):
+def toivonen_experiment(transactions, transactions_df, dataset_size, total_nr_of_items, nr_true_frequent_itemsets,  true_support, true_frequent_itemsets, epsilon = EPSILON, delta = DELTA, miu = MIU):
     """
     Getting the frequent itemsets on a sample with size calculated from Toivonen approach
     Because the sampling is non-deterministic take the average results over 25 runs
@@ -39,7 +39,10 @@ def toivonen_experiment(transactions, transactions_df, dataset_size, total_nr_of
     
         toivonen_frequent_itemsets, nr_toivonen_frequent_itemsets = apriori_df(sample_toivonen, support)
     
-        frq_itemsets = remove_infrequent(transactions, list(toivonen_frequent_itemsets['itemsets']), true_support)
+        frq_itemsets, sample_supports = remove_infrequent(transactions, list(toivonen_frequent_itemsets['itemsets']), true_support)
+        
+        dataset_supports = list(true_frequent_itemsets[true_frequent_itemsets['itemsets'].isin(frq_itemsets)]['support'])        
+        check_guarantees(dataset_supports, sample_supports)        
         
         false_negatives.append(nr_true_frequent_itemsets - len(frq_itemsets))
         false_positives.append(nr_toivonen_frequent_itemsets - len(frq_itemsets))
@@ -51,7 +54,7 @@ def toivonen_experiment(transactions, transactions_df, dataset_size, total_nr_of
     print(f'False negatives mean (standard dev): {fn_avg} ({fn_std})')
     print(f'False positives mean (standard dev): {fp_avg} ({fp_std})')
     
-def RU_experiment(transactions, transactions_df, dataset_size, nr_true_frequent_itemsets,true_support, epsilon = EPSILON, delta = DELTA):
+def RU_experiment(transactions, transactions_df, dataset_size, nr_true_frequent_itemsets,true_support, true_frequent_itemsets, epsilon = EPSILON, delta = DELTA):
     """
     Getting the frequent itemsets on a sample with size calculated from Riondato and Upfal approach
     Because the sampling is non-deterministic take the average results over 25 runs
@@ -85,8 +88,11 @@ def RU_experiment(transactions, transactions_df, dataset_size, nr_true_frequent_
     for _ in range(25):    
         sample_RU = transactions_df.sample(frac=(sample_RU_size/dataset_size), replace=False)    
         RU_frequent_itemsets, nr_RU_frequent_itemsets = apriori_df(sample_RU, support)            
-        frq_itemsets = remove_infrequent(transactions, list(RU_frequent_itemsets['itemsets']), true_support)
-    
+        frq_itemsets, sample_supports = remove_infrequent(transactions, list(RU_frequent_itemsets['itemsets']), true_support)
+                
+        dataset_supports = list(true_frequent_itemsets[true_frequent_itemsets['itemsets'].isin(frq_itemsets)]['support'])        
+        check_guarantees(dataset_supports, sample_supports)
+        
         false_negatives.append(nr_true_frequent_itemsets - len(frq_itemsets))
         false_positives.append(nr_RU_frequent_itemsets - len(frq_itemsets))
     
@@ -98,3 +104,15 @@ def RU_experiment(transactions, transactions_df, dataset_size, nr_true_frequent_
     print(f'False negatives mean (standard dev): {fn_avg} ({fn_std})')
     print(f'False positives mean (standard dev): {fp_avg} ({fp_std})')
     
+    
+def check_guarantees(dataset_supports, sample_supports, epsilon = EPSILON, delta = DELTA):
+    assert(len(dataset_supports) == len(sample_supports))
+    nr_of_errors = 0
+    for i in range(len(dataset_supports)):
+        if abs(dataset_supports[i] - sample_supports[i]) >= epsilon:
+            nr_of_errors += 1
+    
+    if (nr_of_errors/len(dataset_supports) < delta):
+        print('Guarantees holds!!')
+    else:
+        print('Something is wrong!!!')

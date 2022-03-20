@@ -49,10 +49,12 @@ def remove_infrequent(D, frequent_itemsets, true_support):
             if frequent_itemsets[i].issubset(transaction):
                 supports[i] += 1 / data_size           
     true_frequent = []
+    supports_frequent = []
     for i in range(len(frequent_itemsets)):
         if supports[i] >= true_support:
             true_frequent.append(frequent_itemsets[i])            
-    return true_frequent
+            supports_frequent.append(supports[i])
+    return true_frequent, supports_frequent
     
 def apriori_df(data,support, show = False):
     """ Apriori algorithm for frequent item set mining
