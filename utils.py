@@ -34,12 +34,13 @@ def compute_d_bound(df):
     return max(length_dict.keys())
 
 
-def remove_infrequent(df, frequent_itemsets, true_support):
+def remove_infrequent(df, sample_df, frequent_itemsets, true_support):
     """ 
     Removes the sets that are frequent on a sample but are not frequent on the complete dataset
     
     Args:
-        D (list of lists): list of all the transactions
+        df (dataframe): complete transactions dataframe
+        sample_df (dataframe): sample dataframe
         frequent_itemsets (list of sets): the list of frequent itemsets on a sample 
         true_support (float) in (0,1]: the true support on the full data set D
 
@@ -47,20 +48,25 @@ def remove_infrequent(df, frequent_itemsets, true_support):
         list of sets: the list of true frequent itemsets over the complete dataset
     """
     
-    supports = np.zeros(len(frequent_itemsets))
+    sample_supports = np.zeros(len(frequent_itemsets))
+    dataset_supports = np.zeros(len(frequent_itemsets))
     data_size = len(df)    
+    sample_size = len(sample_df)
     for i in range(len(frequent_itemsets)):       
         sums = df[list(frequent_itemsets[i])].sum(axis=1)         
-        supp = sums[sums == len(frequent_itemsets[i])].count()                   
-        supports[i] = supp / data_size           
+        supp = sums[sums == len(frequent_itemsets[i])].count()                           
+        dataset_supports[i] = supp / data_size 
+                  
+        sums = sample_df[list(frequent_itemsets[i])].sum(axis=1)         
+        supp = sums[sums == len(frequent_itemsets[i])].count()    
+        sample_supports[i] = supp / sample_size 
        
-    true_frequent = []
-    supports_frequent = []
+    true_frequent = []    
     for i in range(len(frequent_itemsets)):
-        if supports[i] >= true_support:
+        if dataset_supports[i] >= true_support:
             true_frequent.append(frequent_itemsets[i])            
-            supports_frequent.append(supports[i])
-    return true_frequent, supports_frequent
+            
+    return true_frequent, dataset_supports, sample_supports
     
 def apriori_df(data,support, show = False):
     """ Apriori algorithm for frequent item set mining

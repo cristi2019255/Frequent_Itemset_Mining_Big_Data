@@ -3,7 +3,7 @@ from math import log, sqrt, ceil
 from utils import apriori_df, compute_d_bound, remove_infrequent
 
 
-def toivonen_experiment(transactions, transactions_df, dataset_size, total_nr_of_items, nr_true_frequent_itemsets,  true_support, true_frequent_itemsets, epsilon, delta, miu):
+def toivonen_experiment(transactions_df, dataset_size, total_nr_of_items, nr_true_frequent_itemsets,  true_support, true_frequent_itemsets, epsilon, delta, miu):
     """
     Getting the frequent itemsets on a sample with size calculated from Toivonen approach
     Because the sampling is non-deterministic take the average results over 25 runs
@@ -35,11 +35,10 @@ def toivonen_experiment(transactions, transactions_df, dataset_size, total_nr_of
     
         toivonen_frequent_itemsets, nr_toivonen_frequent_itemsets = apriori_df(sample_toivonen, support)
     
-        frq_itemsets, sample_supports = remove_infrequent(transactions_df, list(toivonen_frequent_itemsets['itemsets']), true_support)
-        
-        dataset_supports = list(true_frequent_itemsets[true_frequent_itemsets['itemsets'].isin(frq_itemsets)]['support'])        
+        frq_itemsets, dataset_supports, sample_supports = remove_infrequent(transactions_df, sample_toivonen, list(toivonen_frequent_itemsets['itemsets']), true_support)
+                
         try: 
-            check_guarantees_Toivonen(dataset_supports, sample_supports, sample_threshold= support, nr_of_items=total_nr_of_items, epsilon=epsilon, delta=delta, miu=miu)        
+            check_guarantees_Toivonen(dataset_supports, sample_supports, sample_threshold= support, epsilon=epsilon, delta=delta, miu=miu)        
         except Exception as e:
             print(e)
         
@@ -54,7 +53,7 @@ def toivonen_experiment(transactions, transactions_df, dataset_size, total_nr_of
     print(f'False negatives mean (standard dev): {fn_avg} ({fn_std})')
     print(f'False positives mean (standard dev): {fp_avg} ({fp_std})')
     
-def RU_experiment(transactions, transactions_df, dataset_size, nr_true_frequent_itemsets,true_support, true_frequent_itemsets, epsilon, delta):
+def RU_experiment(transactions_df, dataset_size, nr_true_frequent_itemsets,true_support, true_frequent_itemsets, epsilon, delta):
     """
     Getting the frequent itemsets on a sample with size calculated from Riondato and Upfal approach
     Because the sampling is non-deterministic take the average results over 25 runs
@@ -85,13 +84,11 @@ def RU_experiment(transactions, transactions_df, dataset_size, nr_true_frequent_
     false_negatives = []
     
     for _ in range(10):    
-        sample_RU = transactions_df.sample(frac=(sample_RU_size/dataset_size), replace=False)    
+        sample_RU = transactions_df.sample(frac=(sample_RU_size/dataset_size), replace=True)    
         RU_frequent_itemsets, nr_RU_frequent_itemsets = apriori_df(sample_RU, support)            
-        frq_itemsets, sample_supports = remove_infrequent(transactions_df, list(RU_frequent_itemsets['itemsets']), true_support)
-                
-        dataset_supports = list(true_frequent_itemsets[true_frequent_itemsets['itemsets'].isin(frq_itemsets)]['support'])        
+        frq_itemsets, dataset_supports, sample_supports = remove_infrequent(transactions_df, sample_RU, list(RU_frequent_itemsets['itemsets']), true_support)                        
         try: 
-            check_guarantees_RU(dataset_supports, sample_supports, epsilon=epsilon, delta=delta)        
+            check_guarantees_RU(dataset_supports, sample_supports, epsilon=epsilon, delta=delta, true_support=true_support)        
         except Exception as e:
             print(e)        
         
@@ -108,28 +105,33 @@ def RU_experiment(transactions, transactions_df, dataset_size, nr_true_frequent_
     print(f'False positives mean (standard dev): {fp_avg} ({fp_std})')    
     
     
-def check_guarantees_RU(dataset_supports, sample_supports, epsilon, delta):
+def check_guarantees_RU(dataset_supports, sample_supports, epsilon, delta, true_support):
     assert(len(dataset_supports) == len(sample_supports))
-    nr_of_errors = 0
+    nr_of_errors_approximation = 0
+    nr_of_errors_almost_frequent = 0
     for i in range(len(dataset_supports)):
         if abs(dataset_supports[i] - sample_supports[i]) > epsilon / 2:
-            nr_of_errors += 1
-    
-    if (nr_of_errors/len(dataset_supports) >= delta):
+            nr_of_errors_approximation += 1
+        if (dataset_supports[i] < true_support - epsilon):
+            nr_of_errors_almost_frequent += 1
+            
+    if (nr_of_errors_approximation/len(dataset_supports) >= delta):
+        raise Exception('Something is wrong!!!')     
+    if (nr_of_errors_almost_frequent/len(dataset_supports) >= delta):
         raise Exception('Something is wrong!!!')     
 
-def check_guarantees_Toivonen(dataset_supports, sample_supports, sample_threshold, nr_of_items, epsilon, delta, miu ):
+def check_guarantees_Toivonen(dataset_supports, sample_supports, sample_threshold, epsilon, delta, miu ):
     assert(len(dataset_supports) == len(sample_supports))
     nr_of_errors = 0
     nr_of_errors_on_sample = 0
     for i in range(len(dataset_supports)):
         if abs(dataset_supports[i] - sample_supports[i]) > epsilon:
             nr_of_errors += 1
-        if sample_supports[i] >= sample_threshold:
+        if sample_supports[i] < sample_threshold:
             nr_of_errors_on_sample += 1
     
     if (nr_of_errors/len(dataset_supports) >= delta):
         raise Exception('Something is wrong!!!')     
-    if (nr_of_errors_on_sample/ (2** nr_of_items) >= miu):
+    if (nr_of_errors_on_sample/ len(dataset_supports) >= miu):
         raise Exception('Something is wrong!!!')     
    
