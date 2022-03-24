@@ -5,7 +5,7 @@ from utils import apriori_df, compute_d_bound, remove_infrequent
 
 EPSILON = 0.1
 DELTA = 0.01
-MIU = 0.001
+MIU = 0.01
 
 def toivonen_experiment(transactions, transactions_df, dataset_size, total_nr_of_items, nr_true_frequent_itemsets,  true_support, true_frequent_itemsets, epsilon = EPSILON, delta = DELTA, miu = MIU):
     """
@@ -43,7 +43,7 @@ def toivonen_experiment(transactions, transactions_df, dataset_size, total_nr_of
         
         dataset_supports = list(true_frequent_itemsets[true_frequent_itemsets['itemsets'].isin(frq_itemsets)]['support'])        
         try: 
-            check_guarantees(dataset_supports, sample_supports)        
+            check_guarantees_Toivonen(dataset_supports, sample_supports, sample_threshold= support, sample_size= sample_toivonen_size)        
         except Exception as e:
             print(e)
         
@@ -95,7 +95,7 @@ def RU_experiment(transactions, transactions_df, dataset_size, nr_true_frequent_
                 
         dataset_supports = list(true_frequent_itemsets[true_frequent_itemsets['itemsets'].isin(frq_itemsets)]['support'])        
         try: 
-            check_guarantees(dataset_supports, sample_supports)        
+            check_guarantees_RU(dataset_supports, sample_supports)        
         except Exception as e:
             print(e)        
         
@@ -111,12 +111,28 @@ def RU_experiment(transactions, transactions_df, dataset_size, nr_true_frequent_
     print(f'False positives mean (standard dev): {fp_avg} ({fp_std})')
     
     
-def check_guarantees(dataset_supports, sample_supports, epsilon = EPSILON, delta = DELTA):
+def check_guarantees_RU(dataset_supports, sample_supports, epsilon = EPSILON, delta = DELTA):
     assert(len(dataset_supports) == len(sample_supports))
     nr_of_errors = 0
     for i in range(len(dataset_supports)):
-        if abs(dataset_supports[i] - sample_supports[i]) >= epsilon:
+        if abs(dataset_supports[i] - sample_supports[i]) > epsilon / 2:
             nr_of_errors += 1
     
     if (nr_of_errors/len(dataset_supports) >= delta):
-        raise Exception('Something is wrong!!!')        
+        raise Exception('Something is wrong!!!')     
+
+def check_guarantees_Toivonen(dataset_supports, sample_supports, sample_threshold, sample_size, epsilon = EPSILON, delta = DELTA, miu = MIU):
+    assert(len(dataset_supports) == len(sample_supports))
+    nr_of_errors = 0
+    nr_of_errors_on_sample = 0
+    for i in range(len(dataset_supports)):
+        if abs(dataset_supports[i] - sample_supports[i]) > epsilon:
+            nr_of_errors += 1
+        if sample_supports[i] >= sample_threshold:
+            nr_of_errors_on_sample += 1
+    
+    if (nr_of_errors/len(dataset_supports) >= delta):
+        raise Exception('Something is wrong!!!')     
+    if (nr_of_errors_on_sample/ sample_size >= miu):
+        raise Exception('Something is wrong!!!')     
+   

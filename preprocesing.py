@@ -16,6 +16,11 @@ def read_data(file_name):
             lines = file.readlines()
             for line in lines[1:]:                
                 transactions.append(line.strip().split(',')[2:])
+    elif file_name == './DataSets/T10I4D100K.txt':
+        with open(file_name, 'r') as file:
+            lines = file.readlines()              
+            for line in lines:                           
+                transactions.append(line.strip().split(' '))
     else:
         data = pd.read_csv(file_name, delimiter=',', header = None)
         for i in range(len(data)): 

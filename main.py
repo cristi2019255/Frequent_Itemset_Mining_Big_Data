@@ -6,8 +6,8 @@ SUPPORT = 0.05
 #DATA_FILE = './DataSets/all_frequent.csv'
 #DATA_FILE = './DataSets/Market_Basket_Optimisation.csv'
 #DATA_FILE = './DataSets/groceries - groceries.csv'
-DATA_FILE = './DataSets/ItemList.csv'
-
+#DATA_FILE = './DataSets/ItemList.csv'
+DATA_FILE = './DataSets/T10I4D100K.txt'
 
 def main():  
     # Reading the data from file
@@ -19,7 +19,8 @@ def main():
     print(f'True support: {SUPPORT}')
     true_frequent_itemsets, nr_true_frequent_itemsets = apriori_df(transactions_df, SUPPORT)
     print(f'Nr of true frequent itemsets: {nr_true_frequent_itemsets}')
-        
+      
+    
     toivonen_experiment(transactions=transactions,
                         transactions_df=transactions_df,
                         dataset_size=dataset_size,
@@ -27,6 +28,7 @@ def main():
                         nr_true_frequent_itemsets=nr_true_frequent_itemsets,
                         true_support=SUPPORT,
                         true_frequent_itemsets= true_frequent_itemsets)    
+    
         
     RU_experiment(transactions=transactions,
                   transactions_df=transactions_df,
