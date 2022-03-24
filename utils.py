@@ -15,7 +15,7 @@ def compute_d_bound(df):
     length_dict = {}
     # removing duplicates (in order to remain only with unique transactions) and geting the length of all transactions 
     df = df.drop_duplicates()
-    df = df.sum(axis=1)       
+    df = df.sum(axis=1) # sum over rows      
     for l in df:       
        if l in length_dict.keys():
            length_dict[l] += 1                          
@@ -34,7 +34,7 @@ def compute_d_bound(df):
     return max(length_dict.keys())
 
 
-def remove_infrequent(D, frequent_itemsets, true_support):
+def remove_infrequent(df, frequent_itemsets, true_support):
     """ 
     Removes the sets that are frequent on a sample but are not frequent on the complete dataset
     
@@ -46,12 +46,14 @@ def remove_infrequent(D, frequent_itemsets, true_support):
     Returns:
         list of sets: the list of true frequent itemsets over the complete dataset
     """
+    
     supports = np.zeros(len(frequent_itemsets))
-    data_size = len(D)
-    for transaction in D:
-        for i in range(len(frequent_itemsets)):
-            if frequent_itemsets[i].issubset(transaction):
-                supports[i] += 1 / data_size           
+    data_size = len(df)    
+    for i in range(len(frequent_itemsets)):       
+        sums = df[list(frequent_itemsets[i])].sum(axis=1)         
+        supp = sums[sums == len(frequent_itemsets[i])].count()                   
+        supports[i] = supp / data_size           
+       
     true_frequent = []
     supports_frequent = []
     for i in range(len(frequent_itemsets)):

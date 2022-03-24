@@ -2,12 +2,17 @@ from experiments import RU_experiment, toivonen_experiment
 from preprocesing import encode_transactions, read_data
 from utils import apriori_df
 
-SUPPORT = 0.05
+SUPPORT = 0.8
+EPSILON = 0.1
+DELTA = 0.01
+MIU = 0.01
+
 #DATA_FILE = './DataSets/all_frequent.csv'
 #DATA_FILE = './DataSets/Market_Basket_Optimisation.csv'
 #DATA_FILE = './DataSets/groceries - groceries.csv'
 #DATA_FILE = './DataSets/ItemList.csv'
-DATA_FILE = './DataSets/T10I4D100K.txt'
+#DATA_FILE = './DataSets/T10I4D100K.txt'
+DATA_FILE = './DataSets/accidents.txt'
 
 def main():  
     # Reading the data from file
@@ -27,7 +32,11 @@ def main():
                         total_nr_of_items=total_nr_of_items,
                         nr_true_frequent_itemsets=nr_true_frequent_itemsets,
                         true_support=SUPPORT,
-                        true_frequent_itemsets= true_frequent_itemsets)    
+                        true_frequent_itemsets= true_frequent_itemsets,
+                        epsilon= EPSILON,
+                        delta = DELTA,
+                        miu = MIU
+                        )    
     
         
     RU_experiment(transactions=transactions,
@@ -35,7 +44,10 @@ def main():
                   dataset_size=dataset_size,
                   nr_true_frequent_itemsets=nr_true_frequent_itemsets, 
                   true_support=SUPPORT,
-                  true_frequent_itemsets= true_frequent_itemsets)    
+                  true_frequent_itemsets= true_frequent_itemsets,
+                  epsilon= EPSILON,
+                  delta = DELTA
+                  )    
         
 if __name__ == '__main__':
     main()
