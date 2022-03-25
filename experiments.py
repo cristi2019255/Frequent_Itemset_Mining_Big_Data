@@ -1,6 +1,8 @@
+from turtle import color
 import numpy as np
 from math import log, sqrt, ceil
 from utils import apriori_df, compute_d_bound, remove_infrequent
+import matplotlib.pyplot as plt
 
 
 def toivonen_experiment(transactions_df, dataset_size, total_nr_of_items, nr_true_frequent_itemsets,  true_support, true_frequent_itemsets, epsilon, delta, miu):
@@ -53,7 +55,7 @@ def toivonen_experiment(transactions_df, dataset_size, total_nr_of_items, nr_tru
     print(f'False negatives mean (standard dev): {fn_avg} ({fn_std})')
     print(f'False positives mean (standard dev): {fp_avg} ({fp_std})')
     
-def RU_experiment(transactions_df, dataset_size, nr_true_frequent_itemsets,true_support, true_frequent_itemsets, epsilon, delta):
+def RU_experiment(transactions_df, dataset_size, nr_true_frequent_itemsets,true_support, d_bound, epsilon, delta):
     """
     Getting the frequent itemsets on a sample with size calculated from Riondato and Upfal approach
     Because the sampling is non-deterministic take the average results over 25 runs
@@ -68,15 +70,11 @@ def RU_experiment(transactions_df, dataset_size, nr_true_frequent_itemsets,true_
         delta (float, optional):  Defaults to DELTA.        
     """
     
-    # computing d-bound
-    d = compute_d_bound(transactions_df)
     
     c = 0.5         
-    sample_RU_size = min(dataset_size, ceil((4*c/(epsilon**2)) * (d + log(1/delta))))
+    sample_RU_size = min(dataset_size, ceil((4*c/(epsilon**2)) * (d_bound + log(1/delta))))
     support = true_support - (epsilon/2)
-    
-    
-    print(f'd-bound: {d}')
+            
     print(f'Sample RU(PAC) size: {sample_RU_size}')
     print(f'Support on sample: {support}')
         
@@ -134,4 +132,20 @@ def check_guarantees_Toivonen(dataset_supports, sample_supports, sample_threshol
         raise Exception('Something is wrong!!!')     
     if (nr_of_errors_on_sample/ len(dataset_supports) >= miu):
         raise Exception('Something is wrong!!!')     
-   
+    
+def plot_sizes(total_nr_of_items, d_bound, dataset_size, delta1 = 10 ** (-4), delta2 = 0.01):
+    epsilons = np.arange(10 ** (-4), 0.2, 10 ** (-3))    
+    sample_toivonen_sizes1 = [min(dataset_size, ceil(1 / (epsilon ** 2) * (total_nr_of_items + log(2/delta1)))) for epsilon in epsilons]
+    sample_RU_sizes1 = [min(dataset_size, ceil(((4*0.5)/(epsilon**2)) * (d_bound + log(1/delta1)))) for epsilon in epsilons]
+    sample_toivonen_sizes2 = [min(dataset_size, ceil(1 / (epsilon ** 2) * (total_nr_of_items + log(2/delta2)))) for epsilon in epsilons]
+    sample_RU_sizes2 = [min(dataset_size, ceil(((4*0.5)/(epsilon**2)) * (d_bound + log(1/delta2)))) for epsilon in epsilons]
+    plt.title('Sample size for epsilon values')
+    plt.plot(epsilons, sample_toivonen_sizes1, color = 'green')
+    plt.plot(epsilons, sample_RU_sizes1, color = 'b')
+    plt.plot(epsilons, sample_toivonen_sizes2, '--', color = 'red')
+    plt.plot(epsilons, sample_RU_sizes2, '--', color = 'orange')
+    
+    plt.legend(['Toivonen, delta = 10^(-4)', 'Riondato & Upfal, delta = 10^(-4)', 'Toivonen, delta = 0.01', 'Riondato & Upfal, delta = 0.01'])
+    plt.xlabel('epsilon')
+    plt.ylabel('Sample size')    
+    plt.show()

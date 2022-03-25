@@ -1,10 +1,11 @@
 from experiments import RU_experiment, toivonen_experiment
 from preprocesing import encode_transactions, read_data
-from utils import apriori_df
+from utils import apriori_df, compute_d_bound
+from datetime import datetime
 
 SUPPORT = 0.05
-EPSILON = 0.08
-DELTA = 0.01
+EPSILON = 0.05
+DELTA = 0.0001
 MIU = 0.01
 
 #DATA_FILE = './DataSets/all_frequent.csv'
@@ -22,10 +23,19 @@ def main():
         
     # getting the frequent itemsets on full data set    
     print(f'True support: {SUPPORT}')
-    true_frequent_itemsets, nr_true_frequent_itemsets = apriori_df(transactions_df, SUPPORT)
-    print(f'Nr of true frequent itemsets: {nr_true_frequent_itemsets}')
-      
+    # computing d-bound
+    d_bound = compute_d_bound(transactions_df)    
+    print(f'd-bound: {d_bound}')
     
+    
+    start = datetime.now()
+    true_frequent_itemsets, nr_true_frequent_itemsets = apriori_df(transactions_df, SUPPORT)
+    run_time = datetime.now() - start
+    print(f'Nr of true frequent itemsets: {nr_true_frequent_itemsets}')    
+    print(f'Run time: {run_time}')        
+    
+    
+    start = datetime.now()
     toivonen_experiment(
                         transactions_df=transactions_df,
                         dataset_size=dataset_size,
@@ -37,18 +47,23 @@ def main():
                         delta = DELTA,
                         miu = MIU
                         )    
+    run_time = (datetime.now() - start) / 10
+    print(f'Run time: {run_time}')
     
-        
+    
+    start = datetime.now()    
     RU_experiment(
                   transactions_df=transactions_df,
                   dataset_size=dataset_size,
                   nr_true_frequent_itemsets=nr_true_frequent_itemsets, 
                   true_support=SUPPORT,
-                  true_frequent_itemsets= true_frequent_itemsets,
+                  d_bound = d_bound,
                   epsilon= EPSILON,
                   delta = DELTA
                   )    
-        
+    run_time = (datetime.now() - start) / 10
+    print(f'Run time: {run_time}')
+    
 if __name__ == '__main__':
     main()
     
