@@ -8,9 +8,6 @@ EPSILON = 0.05
 DELTA = 0.0001
 MIU = 0.01
 
-#DATA_FILE = './DataSets/all_frequent.csv'
-#DATA_FILE = './DataSets/Market_Basket_Optimisation.csv'
-#DATA_FILE = './DataSets/groceries - groceries.csv'
 #DATA_FILE = './DataSets/ItemList.csv'
 DATA_FILE = './DataSets/T10I4D100K.txt'
 #DATA_FILE = './DataSets/accidents.txt'
